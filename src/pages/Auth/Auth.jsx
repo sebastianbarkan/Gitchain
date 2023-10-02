@@ -1,26 +1,31 @@
 import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import Home from '../Home/Home'
 import SignIn from '../SignIn/SignIn'
 import { checkAuth } from '../../redux/slices/AuthSlice'
 
-function Auth() {
+function Auth({ children }) {
     const authenticated = useSelector(state => state.auth.authenticated)
+    const loading = useSelector(state => state.auth.loading)
     const dispatch = useDispatch()
-    dispatch(checkAuth())
 
-
+    useEffect(() => {
+        dispatch(checkAuth())
+    }, [])
+   
     return (
         <>
             {
-                authenticated ?
-                    (
-                        <Home />
-                    )
+                loading ?
+                    <p>Loading</p>
                     :
-                    (
-                        <SignIn />
-                    )
+                    authenticated ?
+                        (
+                            { ...children }
+                        )
+                        :
+                        (
+                            <SignIn />
+                        )
 
             }
         </>

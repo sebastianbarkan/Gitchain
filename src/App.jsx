@@ -1,6 +1,4 @@
-import './App.css'
-import { Provider } from 'react-redux'
-import { store } from './redux/store'
+import React, { useEffect } from "react"
 import Home from './pages/Home/Home.jsx';
 import Profile from './pages/Profile/Profile.jsx';
 import SignIn from './pages/SignIn/SignIn';
@@ -9,21 +7,39 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import StandardLayout from './layouts/StandardLayout/StandardLayout';
+import New from './pages/New/New';
 
-function App() {
+export default function App() {
 
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <Auth/>,
+      element: <StandardLayout />,
       children: [
         {
-          path: "home",
-          element: <Home />,
+          index: true,
+          element: 
+          <Auth>
+            <Home />
+          </Auth>
+          ,
         },
         {
           path: "profile",
-          element: <Profile />,
+          element: 
+          <Auth>
+            <Profile />
+          </Auth>
+          ,
+        },
+        {
+          path: "profile",
+          element: 
+          <Auth>
+            <New />
+          </Auth>
+          ,
         },
         {
           path: "signin",
@@ -34,10 +50,8 @@ function App() {
   ]);
 
   return (
-      <Provider store={store}>
-        <RouterProvider router={router} />
-      </Provider>
+    <RouterProvider router={router} />
   )
 }
 
-export default App
+

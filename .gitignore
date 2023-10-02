@@ -26,3 +26,7 @@ dist-ssr
 #ENVS
 /server-src/.env
 /src/.env
+
+#PERSONAL INSTRUCTIONS
+
+startup.md
