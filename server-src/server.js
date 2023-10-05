@@ -4,6 +4,7 @@ import cors from 'cors';
 import session from 'express-session';
 import dotenv from 'dotenv';
 import qs from "qs"
+import mysql from "mysql2"
 import axios from "axios"
 // Load environment variables from .env file
 dotenv.config();
@@ -17,6 +18,23 @@ app.use(cors({
   optionsSuccessStatus: 204,
 }));
 
+
+const connection = mysql.createConnection({
+  host: process.env.HOST,
+  port: process.env.PORT,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE
+});
+
+connection.connect((err) => {
+  if (err) {
+    console.error('Error connecting to MySQL:', err.stack);
+    return;
+  }
+  console.log('Connected to MySQL as ID ' + connection.threadId);
+});
+
 app.use(express.json());  // Parse JSON bodies
 app.use(session({
   secret: process.env.SECRET_KEY,  // Use a strong secret key
@@ -28,6 +46,29 @@ app.use(session({
     sameSite: 'Lax'  // Helps prevent CSRF
   }
 }));
+
+app.post('/create-task', async (req, res) => {
+  const { taskId, description, githubRepo, category, languages, amount } = req.body;
+
+  // 1. Data validation
+  if (!taskId || !description || !githubRepo || !category || !languages || !Array.isArray(languages) || amount) {
+    return res.status(400).send('Invalid data provided.');
+  }
+
+  // 2. Convert languages array to string (comma-separated)
+  const languagesStr = languages.join(',');
+
+  // 3. Insert into database
+  const query = 'INSERT INTO gitchain.tasks (taskId, description, githubRepo, category, languages, amount) VALUES (?, ?, ?, ?, ?, ?)';
+
+  connection.query(query, [taskId, description, githubRepo, category, languagesStr, amount], (error, results) => {
+    if (error) {
+      console.error("Error inserting into database:", error);
+      return res.status(500).send('Server error.');
+    }
+    res.status(201).send('Task successfully created.');
+  });
+});
 
 
 app.post('/auth', (req, res) => {
@@ -85,7 +126,6 @@ app.get('/auth/github/callback', async (req, res) => {
 });
 
 app.get('/user-data', async (req, res) => {
-
   if (!req.session.accessToken) {
     res.status(401).send('No Access Token!');
     return
@@ -94,7 +134,6 @@ app.get('/user-data', async (req, res) => {
   try {
     const userRepos = await getUserRepos(req.session.accessToken);
     const languageData = await Promise.all(userRepos.map(repo => getRepoLanguages(req.session.accessToken, repo)));
-
     // Assuming contributions need to be fetched from each repo
     const contributions = await Promise.all(userRepos.map(repo => getUserContributions(req.session.accessToken, repo)));
     // ... process languageData and contributions to desired format ...
@@ -114,12 +153,11 @@ async function getUserRepos(accessToken) {
     }
   };
   const response = await axios.get('https://api.github.com/user/repos', config);
-  
   return response.data;
 }
 
 async function getRepoLanguages(accessToken, repo) {
- 
+
   const config = {
     headers: {
       'Authorization': `token ${accessToken}`
@@ -133,12 +171,12 @@ async function getRepoLanguages(accessToken, repo) {
   try {
     const response = await axios.get(`https://api.github.com/repos/${repoOwner}/${repoName}/languages`, config);
     return response.data;
-  
-  } catch(err) {
+
+  } catch (err) {
     console.log("CATCH error", err)
     return 500
   }
-  
+
 }
 
 async function getUserContributions(accessToken, repo) {
@@ -152,18 +190,18 @@ async function getUserContributions(accessToken, repo) {
   };
   const repoOwner = repo.owner.login;
   const repoName = repo.name;
-  
+
   try {
     // Fetching authenticated user details.
     const userResponse = await axios.get('https://api.github.com/user', config);
     const username = userResponse.data.login;
-    
+
     // Fetching all commits from the repository.
     const response = await axios.get(`https://api.github.com/repos/${repoOwner}/${repoName}/commits`, config);
-    
+
     // Filtering commits based on the authenticated user’s username.
     const userCommits = response.data.filter(commit => commit.author && commit.author.login === username);
-    
+
     // Returning the count of commits made by the authenticated user.
     return userCommits.length;
   } catch (err) {

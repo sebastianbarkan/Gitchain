@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import SignIn from '../SignIn/SignIn'
 import { checkAuth } from '../../redux/slices/AuthSlice'
+import { Navigate } from "react-router-dom";
 
 function Auth({ children }) {
     const authenticated = useSelector(state => state.auth.authenticated)
@@ -24,7 +25,7 @@ function Auth({ children }) {
                         )
                         :
                         (
-                            <SignIn />
+                            <Navigate to="/signin" replace={true} />
                         )
 
             }

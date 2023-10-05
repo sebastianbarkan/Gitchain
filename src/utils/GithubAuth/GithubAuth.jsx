@@ -1,5 +1,6 @@
-// GithubAuth.js
 import React from 'react';
+import Person from "../../assets/Person.svg"
+import styles from "./GithubAuth.module.css"
 
 function GithubAuth() {
   const handleOAuth = async () => {
@@ -12,7 +13,10 @@ function GithubAuth() {
   };
 
   return (
-    <button onClick={handleOAuth}>GITHUB AUTH</button>
+    <button onClick={handleOAuth} className={styles.btn}>
+      <img src={Person} alt="person logo" className={styles["img-person"]}></img>
+      <p>Find a job</p>
+    </button>
   );
 }
 

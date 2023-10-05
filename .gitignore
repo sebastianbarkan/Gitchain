@@ -30,3 +30,14 @@ dist-ssr
 #PERSONAL INSTRUCTIONS
 
 startup.md
+node_modules
+.env
+coverage
+coverage.json
+typechain
+typechain-types
+
+# Hardhat files
+cache
+artifacts
+

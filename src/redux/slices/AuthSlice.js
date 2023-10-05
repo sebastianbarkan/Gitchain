@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { establishUser } from "./UserSlice";
 
 const initialState = {
     authenticated: false,
@@ -6,7 +7,7 @@ const initialState = {
     loading: true
 }
 
-export const checkAuth = createAsyncThunk("auth/checkAuth", async (_, thunkAPI) => {
+export const checkAuth = createAsyncThunk("auth/checkAuth", async (_, { dispatch}) => {
 
     try {
         const response = await fetch("http://localhost:3001/session-data", {
@@ -16,10 +17,14 @@ export const checkAuth = createAsyncThunk("auth/checkAuth", async (_, thunkAPI) 
 
         if (response.status === 200) {
             const data = await response.json()
+            const address = data.address
+            await dispatch(establishUser(address))
             return { status: response.status, data }
         } else {
             return { status: response.status, data: null }
         }
+
+        
         
     } catch (err) {
         console.error("ERROR", err.status);  // Changed console.log to console.error

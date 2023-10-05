@@ -1,0 +1,13 @@
+.btn {
+    border: none;
+    display: flex;
+    background-color: #9747FF;
+    border-radius: 25px;
+    padding: .5rem 1rem;
+    column-gap: .25rem; 
+    align-items: center;
+}
+
+.img-person {
+    
+}

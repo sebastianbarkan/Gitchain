@@ -2,7 +2,12 @@ import React, { useEffect, useState } from 'react'
 import styles from "./SignIn.module.css"
 import { useDispatch, useSelector } from 'react-redux';
 import { setAuth } from '../../redux/slices/AuthSlice';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import Brand from "../../assets/Brand.png"
+import GraphicsLP from "../../assets/GraphicsLP.png"
+import LinkBtnLP from "../../assets/LinkBtnLP.png"
+import TextLP from "../../assets/TextLP.svg"
+
 
 export default function SignIn() {
     const [walletError, setWalletError] = useState(false)
@@ -11,6 +16,9 @@ export default function SignIn() {
     const authenticated = useSelector(state => state.auth.authenticated)
     const [tronInstalled, setTronInstalled] = useState(true)
     const [tronLogin, setTronLogin] = useState(false)
+    const location = useLocation()
+
+    console.log("LOCATION", location.pathname)
 
     useEffect(() => {
         if (authenticated) {
@@ -19,14 +27,15 @@ export default function SignIn() {
     }, [authenticated])
 
     useEffect(() => {
+        console.log("LOG HERE")
         const triggerTronWeb = async () => {
+            console.log("TRON HERE")
             await getTronWeb()
         }
         triggerTronWeb()
     }, [window.tronLink])
 
     async function getTronWeb() {
-        console.log("HERE")
         try {
             let tronWeb;
             if (window.tronLink) {
@@ -36,18 +45,14 @@ export default function SignIn() {
                         dispatch(setAuth({ address: tronWeb.defaultAddress.base58 }))
                     }
                 } else {
-                    console.log("WINDOW", window.tronLink)
                     try {
                         const res = await window.tronLink.request({ method: 'tron_requestAccounts' });
-                        console.log("RES", res)
                         if (res.code === 200) {
                             tronWeb = window.tronLink.tronWeb;
                         }
                     } catch (error) {
                         console.error("Error during tronLink request", error);
                     }
-
-
                 }
 
                 if (tronWeb === undefined) {
@@ -65,43 +70,54 @@ export default function SignIn() {
         }
     }
     return (
-        <section>
-            <h1 className={styles.header}>Ready to fire your boss?</h1>
-            <button
-                type="button"
-                onClick={getTronWeb}
-                className={styles.btn}
-            >
-                Connect Tron Wallet
-            </button>
-            {
-                walletError ?
-                    (
-                        <p>
-                            There was an error connecting your wallet.
-                            Please make sure you have the TronLink extension.
-                            Look below for instructions.
-                        </p>
-                    )
-                    :
-                    null
-            }
-
-            {
-                tronInstalled ?
-                    null
-                    :
+        <section className={styles.wrapper}>
+            <div className={styles.imgWrap}>
+                <img src={Brand} alt="Gitchain logo" className={styles["img-brand"]}></img>
+            </div>
+            <div className={styles.contentWrap}>
+                <img src={TextLP} alt="main text" className={styles["img-text"]} />
+                <button
+                    type="button"
+                    onClick={getTronWeb}
+                    className={styles.btn}
+                >
+                    <img src={LinkBtnLP} alt="chain img" className={styles["img-link"]}></img>
                     <p>
-                        TRON Wallet not detected please download the Tron Wallet extension
-                        <a href='https://www.tronlink.org/' target='_blank'>Click Here For more Information</a>
+                        Connect Tron Wallet
                     </p>
-            }
-            {
-                tronLogin ?
-                    <p>We have detected a Tron wallet, please login in order to be authorized</p>
-                    :
-                    null
-            }
+                </button>
+                {
+                    walletError ?
+                        (
+                            <p>
+                                There was an error connecting your wallet.
+                                Please make sure you have the TronLink extension.
+                                Look below for instructions.
+                            </p>
+                        )
+                        :
+                        null
+                }
+
+                {
+                    tronInstalled ?
+                        null
+                        :
+                        <p>
+                            TRON Wallet not detected please download the Tron Wallet extension
+                            <a href='https://www.tronlink.org/' target='_blank'>Click Here For more Information</a>
+                        </p>
+                }
+                {
+                    tronLogin ?
+                        <p className={styles["warning-login"]}>We have detected a Tron wallet, please login in order to be authorized</p>
+                        :
+                        null
+                }
+            </div>
+            <div className={styles.imgWrap}>
+                <img src={GraphicsLP} alt="Gitchain graphics" className={styles["img-graphics"]} />
+            </div>
         </section>
     )
 }

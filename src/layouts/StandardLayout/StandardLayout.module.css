@@ -1,7 +1,29 @@
 .wrapper {
-    max-width: 80%;
+    max-width: 100%;
+    width: 100%;
+    height: 100vh;
+    padding: 2% 10%;
     display: flex;
     flex-direction: column;
-    padding: 2rem;
     align-items: center;
+    overflow: hidden;
+}
+
+.img-background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-size: cover; /* Ensure full coverage while maintaining aspect ratio */
+    background-repeat: no-repeat; /* Prevent background image from repeating */
+    background-position: center;
+    background-image: url("../../assets/BackgroundLP.svg");
+}
+
+.main {
+    width: 100%;
+    padding: 3% 0%;
+    display: flex;
+    flex-direction: column;
 }

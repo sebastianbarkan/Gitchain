@@ -1,0 +1,113 @@
+.wrapper {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.form {
+    display: flex;
+    padding: 2rem;
+    flex-direction: column;
+    row-gap: 1rem;
+    background-color: #24262eb8;
+    border: 1px solid rgba(123, 123, 123, 0.135);
+    border-radius: 12px;
+    position: relative;
+    width: 90%;  
+    max-width: 600px;
+    max-height: 80vh;  /* This means the form will take up 80% of the viewport height */
+    overflow-y: auto;  /* Add vertical scroll when the content exceeds the max height */
+    -webkit-overflow-scrolling: touch;
+}
+
+.form > * {
+    z-index: 10;
+}
+
+.heading {
+    font-size: 1.5rem;
+    color: white;
+    font-weight: 500;
+    z-index: 10;
+}
+
+.img-background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    background-size: cover; /* Ensure full coverage while maintaining aspect ratio */
+    background-repeat: no-repeat; /* Prevent background image from repeating */
+    background-position: center;
+    background-image: url("../../assets/GradientCT.svg");
+}
+
+.input-wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    row-gap: .5rem;
+}
+
+.label {
+    color: #ffffff94;
+    font-size: .65rem;
+    font-weight: 500;
+    padding: 0rem .5rem;
+}
+
+.input {
+    background-color: #24262E;
+    border: 1px solid rgba(123, 123, 123, 0.135);
+    border-radius: 12px;
+    padding: .5rem 1rem;
+    color: rgba(255, 255, 255, 0.782);
+    font-size: .85rem;
+}
+
+.input:active {
+    outline: 1px solid #9747FF;
+}
+
+.input:focus {
+    outline: 1px solid #9747FF;
+}
+
+.input-wrap-top-select {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    row-gap: .5rem;
+}
+
+.input-wrap-top-select > * {
+    z-index: 5;
+}
+
+.input-wrap-bottom-select {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    row-gap: .5rem;
+}
+
+.input-wrap-bottom-select > * {
+    z-index: 2;
+}
+
+.btn {
+    border: none;
+    border-radius: 12px;
+    background-color: #9747FF;
+    color: #1C1D22;
+    font-size: 1.25rem;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #7334c5;
+} 
