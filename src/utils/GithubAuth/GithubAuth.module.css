@@ -6,8 +6,5 @@
     padding: .5rem 1rem;
     column-gap: .25rem; 
     align-items: center;
-}
-
-.img-person {
-    
+    cursor: pointer;
 }

@@ -21,10 +21,8 @@ export default function Home() {
     const runFetchTasks = async () => {
       await dispatch(fetchTasks())
     }
-
-    if (!allTasks) {
-      runFetchTasks()
-    }
+    
+    runFetchTasks()
   }, []);
 
   return (

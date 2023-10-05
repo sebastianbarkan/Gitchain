@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { checkAuth } from '../../redux/slices/AuthSlice'
 import { Navigate } from "react-router-dom";
 import { fetchUserData } from '../../redux/slices/GithubSlice';
+import tronWeb from '../../tron/tronWeb';
+import { setAuth } from '../../redux/slices/AuthSlice';
 
 function Auth({ children }) {
     const authenticated = useSelector(state => state.auth.authenticated)
@@ -11,6 +13,7 @@ function Auth({ children }) {
     const githubAuth = useSelector(state => state.github.githubAuth)
     const contributions = useSelector(state => state.github.contributions)
     const languages = useSelector(state => state.github.languages)
+    const address = useSelector(state => state.auth.address)
 
     useEffect(() => {
         if (!authenticated || !githubAuth) {
@@ -21,6 +24,28 @@ function Auth({ children }) {
             dispatch(fetchUserData())
         }
     }, [])
+
+    useEffect(() => {
+        let previousAddress = null;
+
+        setInterval(() => {
+            // Ensure tronWeb is available and properly initialized
+            if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
+                const currentAddress = window.tronWeb.defaultAddress.base58;
+                console.log("CURRENT", currentAddress)
+                console.log("OLDER", address)
+                // If the address is different from the previously stored one, log the change
+                if (currentAddress !== previousAddress) {
+                    console.log('Address changed:', currentAddress);
+                    dispatch(setAuth({ address: currentAddress}))
+                    previousAddress = currentAddress;
+                }
+            }
+        }, 10000);
+
+
+      
+    }, [tronWeb.fullNode.host])
 
     return (
         <>

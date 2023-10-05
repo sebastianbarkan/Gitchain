@@ -24,7 +24,6 @@ function SearchResults() {
   // }, [taskFilter, allTasks])
 
 
-  console.log("TAKSS", allTasks)
   return (
     <div className={styles.wrapper}>
       {

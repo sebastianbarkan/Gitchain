@@ -18,8 +18,6 @@ export default function SignIn() {
     const [tronLogin, setTronLogin] = useState(false)
     const location = useLocation()
 
-    console.log("LOCATION", location.pathname)
-
     useEffect(() => {
         if (authenticated) {
             navigate("/");
@@ -27,9 +25,7 @@ export default function SignIn() {
     }, [authenticated])
 
     useEffect(() => {
-        console.log("LOG HERE")
         const triggerTronWeb = async () => {
-            console.log("TRON HERE")
             await getTronWeb()
         }
         triggerTronWeb()

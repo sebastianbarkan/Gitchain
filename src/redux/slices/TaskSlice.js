@@ -156,7 +156,7 @@ export const createTask = createAsyncThunk(
 	'task/createTask',
 	async ({ taskLevel, signerLevel, bountyAmount, description, languages, category, githubRepo }, { getState, dispatch }) => {
 		const taskId = uuidv4();
-		console.log("TRONWEB", taskLevel, githubRepo)
+	
 		try {
 			const contract = tronWeb.contract(ABI, import.meta.env.VITE_APP_CONTRACT_ADDRESS_TASK);
 
@@ -164,7 +164,6 @@ export const createTask = createAsyncThunk(
 				callValue: bountyAmount,
 			});
 
-			console.log("TX INFO", transactionInfo)
 			if (!transactionInfo) {
 				throw new Error('No response from contract.');
 			}
@@ -176,7 +175,6 @@ export const createTask = createAsyncThunk(
 			while (attempts < maxAttempts) {
 				attempts++;
 				try {
-					console.log("CHECK HERE", transactionInfo)
 					transactionReceipt = await tronWeb.trx.getConfirmedTransaction(transactionInfo);
 
 					if (transactionReceipt && transactionReceipt.ret && transactionReceipt.ret[0].contractRet === 'SUCCESS') {
@@ -198,8 +196,6 @@ export const createTask = createAsyncThunk(
 			}
 
 			const taskData = await contract.tasks(taskId).call();
-
-			console.log("TASK DATA", githubRepo)
 			if (taskData) {
 				await dispatch(saveTaskInfo({ taskId, category, description, languages, githubRepo, amount: bountyAmount }));
 			} else {
@@ -218,11 +214,12 @@ export const createTask = createAsyncThunk(
 export const initializeSubmission = createAsyncThunk(
 	'task/initializeSubmission',
 	async ({ taskId, userLevel }, { getState, dispatch }) => {
+		console.log("arggg", taskId, userLevel)
 		try {
 			const contract = tronWeb.contract(ABI, import.meta.env.VITE_APP_CONTRACT_ADDRESS_TASK);
 
 			const transactionInfo = await contract.initializeSubmission(taskId, userLevel).send();
-
+			console.log("TRX INFO", transactionInfo)
 			if (!transactionInfo) {
 				throw new Error('No response from contract.');
 			}
@@ -250,7 +247,7 @@ export const initializeSubmission = createAsyncThunk(
 			}
 
 			const taskData = await contract.tasks(taskId).call();
-
+			console.log("CHECK SUBMISSION", taskData.submitter, tronWeb.defaultAddress.base58.toLowerCase())
 			if (!taskData || taskData.submitter.toLowerCase() !== tronWeb.defaultAddress.base58.toLowerCase()) {
 				throw new Error('Initialization was not successful or submitter does not match.');
 			}
@@ -261,6 +258,154 @@ export const initializeSubmission = createAsyncThunk(
 			return thunkAPI.rejectWithValue(error.toString());
 		}
 	}
+);
+
+export const submitUserTask = createAsyncThunk(
+    'task/submitUserTask',
+    async ({ taskId, githubCommit }, { getState, dispatch }) => {
+        console.log("Submitting for task ID:", taskId, "with commit:", githubCommit);
+
+        try {
+            const contract = tronWeb.contract(ABI, import.meta.env.VITE_APP_CONTRACT_ADDRESS_TASK);
+
+            // Call the submitTask function in the contract
+            const transactionInfo = await contract.submitTask(taskId, githubCommit).send();
+            console.log("TRX INFO", transactionInfo);
+
+            if (!transactionInfo) {
+                throw new Error('No response from contract.');
+            }
+
+            // Polling mechanism to wait for transaction confirmation
+            let transactionReceipt = null;
+            const maxAttempts = 100;
+            let attempts = 0;
+            while (attempts < maxAttempts) {
+                attempts++;
+                try {
+                    transactionReceipt = await tronWeb.trx.getConfirmedTransaction(transactionInfo);
+
+                    if (transactionReceipt && transactionReceipt.ret && transactionReceipt.ret[0].contractRet === 'SUCCESS') {
+                        break; // break out of the loop if the transaction is found and is successful
+                    }
+                } catch (err) {
+                    console.log("Transaction not yet confirmed, retrying in 10 seconds..."); // Log the retry attempt
+                }
+                await new Promise(resolve => setTimeout(resolve, 10000)); // wait for 10 seconds before polling again
+            }
+
+            if (!transactionReceipt || !transactionReceipt.ret || transactionReceipt.ret[0].contractRet !== 'SUCCESS') {
+                throw new Error('Transaction was not confirmed in time or failed.');
+            }
+
+            const taskData = await contract.tasks(taskId).call();
+
+            if (!taskData || taskData.githubCommit !== githubCommit) {
+                throw new Error('Submission was not successful or the github commit does not match.');
+            }
+
+            return transactionInfo;
+        } catch (error) {
+            console.error("Error submitting the task:", error);
+            throw error;  // Throwing error will automatically be caught as a rejected action by the createAsyncThunk
+        }
+    }
+);
+
+export const fetchSubmitterAddress = createAsyncThunk(
+    'task/fetchSubmitterAddress',
+    async (taskId, { rejectWithValue }) => {
+        try {
+            const contract = tronWeb.contract(ABI, import.meta.env.VITE_APP_CONTRACT_ADDRESS_TASK);
+
+			console.log("TASK ID", taskId)
+            // Fetch task data by taskId
+            const taskData = await contract.tasks(taskId.taskId).call();
+
+			console.log("submitter", taskData)
+            // Extract and return the submitter address from the task data
+            return taskData.submitter;
+
+        } catch (error) {
+            console.error("Error fetching submitter address:", error);
+            return rejectWithValue(error.toString());
+        }
+    }
+);
+
+export const completeUserTask = createAsyncThunk(
+    'task/completeUserTask',
+    async ({ taskId, signerLevel, verdict }, { getState, dispatch }) => {
+        console.log("Completing task ID:", taskId, "with signerLevel:", signerLevel, "and verdict:", verdict);
+
+        try {
+            const contract = tronWeb.contract(ABI, import.meta.env.VITE_APP_CONTRACT_ADDRESS_TASK);
+
+            // Call the completeTask function in the contract
+            const transactionInfo = await contract.completeTask(taskId, signerLevel, verdict).send();
+            console.log("TRX INFO", transactionInfo);
+
+            if (!transactionInfo) {
+                throw new Error('No response from contract.');
+            }
+
+            // Polling mechanism to wait for transaction confirmation
+            let transactionReceipt = null;
+            const maxAttempts = 100;
+            let attempts = 0;
+            while (attempts < maxAttempts) {
+                attempts++;
+                try {
+                    transactionReceipt = await tronWeb.trx.getConfirmedTransaction(transactionInfo);
+
+                    if (transactionReceipt && transactionReceipt.ret && transactionReceipt.ret[0].contractRet === 'SUCCESS') {
+                        break; // break out of the loop if the transaction is found and is successful
+                    }
+                } catch (err) {
+                    console.log("Transaction not yet confirmed, retrying in 10 seconds..."); // Log the retry attempt
+                }
+                await new Promise(resolve => setTimeout(resolve, 10000)); // wait for 10 seconds before polling again
+            }
+
+            if (!transactionReceipt || !transactionReceipt.ret || transactionReceipt.ret[0].contractRet !== 'SUCCESS') {
+                throw new Error('Transaction was not confirmed in time or failed.');
+            }
+
+            const taskData = await contract.tasks(taskId).call();
+
+            if (!taskData || taskData.status !== verdict) { // modify this condition based on your needs
+                throw new Error('Completion was not successful or the status does not match.');
+            }
+
+            return transactionInfo;
+        } catch (error) {
+            console.error("Error completing the task:", error);
+            throw error;  // Throwing error will automatically be caught as a rejected action by the createAsyncThunk
+        }
+    }
+);
+
+export const fetchTaskStatus = createAsyncThunk(
+    'task/fetchTaskStatus',
+    async ({ taskId }, { getState, dispatch }) => {
+        try {
+            // Instantiate the contract
+            const contract = tronWeb.contract(ABI, import.meta.env.VITE_APP_CONTRACT_ADDRESS_TASK);
+
+            // Fetch the task data
+            const taskData = await contract.tasks(taskId).call();
+            if (!taskData) {
+                throw new Error('No task found with the provided ID.');
+            }
+
+            // Return the status of the taskcon
+            return taskData.status;
+
+        } catch (error) {
+            console.error("Error fetching task status:", error);
+            throw error;  // In async thunks, simply throw the error and it will be handled as a rejected action
+        }
+    }
 );
 
 
@@ -288,7 +433,6 @@ export const fetchTasks = createAsyncThunk("task/fetchTasks", async (_, { reject
 		});
 
 		// We expect the server to return an array of tasks if successful
-		console.log("HERE", response)
 		return response.data;
 	} catch (error) {
 		// If there's an error, we'll handle it by returning the rejected value
