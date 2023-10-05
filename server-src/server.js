@@ -51,22 +51,43 @@ app.post('/create-task', async (req, res) => {
   const { taskId, description, githubRepo, category, languages, amount } = req.body;
 
   // 1. Data validation
-  if (!taskId || !description || !githubRepo || !category || !languages || !Array.isArray(languages) || amount) {
+  if (!taskId || !description || !githubRepo || !category || !languages || !Array.isArray(languages) || !amount) {
     return res.status(400).send('Invalid data provided.');
   }
 
-  // 2. Convert languages array to string (comma-separated)
-  const languagesStr = languages.join(',');
+  // 2. Convert languages array of objects to string (comma-separated)
+  const languagesStr = languages.map(lang => lang.value).join(',');
 
-  // 3. Insert into database
+  // 3. Convert amount to a suitable decimal format
+  const formattedAmount = parseFloat(amount).toFixed(2);
+
+  // 4. Insert into database
   const query = 'INSERT INTO gitchain.tasks (taskId, description, githubRepo, category, languages, amount) VALUES (?, ?, ?, ?, ?, ?)';
 
-  connection.query(query, [taskId, description, githubRepo, category, languagesStr, amount], (error, results) => {
+  connection.query(query, [taskId, description, githubRepo, category, languagesStr, formattedAmount], (error, results) => {
     if (error) {
       console.error("Error inserting into database:", error);
       return res.status(500).send('Server error.');
     }
     res.status(201).send('Task successfully created.');
+  });
+});
+
+
+app.get('/fetch-tasks', async (req, res) => {
+  const query = 'SELECT * FROM gitchain.tasks';
+
+  connection.query(query, (error, results) => {
+      if (error) {
+          console.error("Error fetching data from database:", error);
+          return res.status(500).send('Server error.');
+      }
+      // Convert languages string back to an array of objects for consistency with the POST data
+      const tasksWithFormattedLanguages = results.map(task => ({
+          ...task,
+          languages: task.languages.split(',').map(value => ({ value, label: value.charAt(0).toUpperCase() + value.slice(1) }))  // This assumes the language labels are capitalized versions of the values
+      }));
+      res.status(200).json(tasksWithFormattedLanguages);
   });
 });
 

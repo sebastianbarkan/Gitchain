@@ -45,3 +45,12 @@
 .warning-login {
     color: red;
 }
+
+.no-detect {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    row-gap: .5rem;
+    justify-content: center;
+}

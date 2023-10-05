@@ -10,7 +10,6 @@ const initialState = {
 export const fetchUserData = createAsyncThunk("github/fetchUserData", async () => {
     try {
         const response = await axios.get('http://localhost:3001/user-data', { withCredentials: true });
-        console.log(response.data);
         return response.data
     } catch (error) {
         console.error('Failed to fetch user data', error);

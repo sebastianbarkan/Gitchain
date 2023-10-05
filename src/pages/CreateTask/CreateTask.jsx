@@ -5,6 +5,7 @@ import Select, { components } from 'react-select';
 import { customStylesCategory, customStylesLanguages, languageOptions, categoryOptions } from '../../utils/ReactSelect';
 import { createTask } from '../../redux/slices/TaskSlice';
 
+
 const ChevronDown = () => (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path fillRule="evenodd" clipRule="evenodd" d="M3.293 6.293L8 11L12.707 6.293L14.414 8L8 14.414L1.58579 8L3.29289 6.293L3.293 6.293Z" fill="rgba(255, 255, 255, 0.782)" />
@@ -45,7 +46,6 @@ function CreateTask() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("TEST SUBMIT", formValues);
     
         for (const key in formValues) {
             if (formValues[key] === null || formValues[key] === "" || formValues[key] === 0) {
@@ -63,14 +63,20 @@ function CreateTask() {
             try {
                 const resultAction = await dispatch(createTask({taskLevel: level, signerLevel, bountyAmount: amount, githubRepo, category, description, languages}));
                 if (createTask.fulfilled.match(resultAction)) {
-                    await dispatch(saveTaskInfo(category, githubRepo, description))
-                    // handle any other logic upon successful creation
+                    setAmount("")
+                    setLevel("")
+                    setDescription("")
+                    setSignerLevel("")
+                    setGithubRepo("")
+                    setCategory("")
+                    setLanguages([])
                 } else {
                     console.log('Failed to create the task');
                     // handle failure logic here
                 }
             } catch (err) {
                 console.error("Error submitting the form:", err);
+                throw err
             }
         }
     
@@ -171,6 +177,7 @@ function CreateTask() {
                         name='githubRepo'
                         value={githubRepo}
                         onChange={(e) => {
+                            console.log("ETARGET", e.target.value)
                             setGithubRepo(e.target.value)
                         }}
                         id='githubRepo'
@@ -190,7 +197,7 @@ function CreateTask() {
                         styles={customStylesCategory}
                         options={categoryOptions}
                         onChange={(option) => {
-                            setCategory(option)
+                            setCategory(option.value)
                         }}
                         components={{
                             DropdownIndicator,

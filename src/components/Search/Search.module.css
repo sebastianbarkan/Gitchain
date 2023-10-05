@@ -1,0 +1,39 @@
+.wrapper {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.inputWrap {
+    position: relative;
+    display: flex;
+    width: 60%;
+    align-items: center;
+    justify-content: center;
+}
+
+.img-search {
+    position: absolute;
+    left: 1rem;
+}
+
+.input {
+    border-radius: 12px;
+    width: 100%;
+    background-color: #24262E;
+    padding: .5rem 1rem .5rem 3rem;
+    font-size: 1.15rem;
+    color: white;
+    border: 1px solid rgba(123, 123, 123, 0.135);
+}
+
+.input:focus {
+    outline: 2px solid #9747FF;
+    border: none;
+}
+
+.input:active {
+    outline: 2px solid #9747FF;
+    border: none;
+}

@@ -103,7 +103,7 @@ export default function SignIn() {
                     tronInstalled ?
                         null
                         :
-                        <p>
+                        <p className={styles["no-detect"]}>
                             TRON Wallet not detected please download the Tron Wallet extension
                             <a href='https://www.tronlink.org/' target='_blank'>Click Here For more Information</a>
                         </p>

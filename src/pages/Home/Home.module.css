@@ -3,4 +3,5 @@
     width: 100%;
     row-gap: 3rem;
     flex-direction: column;
+    padding: 2% 0%;
 }
