@@ -14,14 +14,14 @@ function SearchResults() {
     threshold: 0.3,
   };
 
-  const fuse = new Fuse(allTasks, fuseOptions);
-  let results;
-  useEffect(() => {
-    if (taskFilter) {
-      results = fuse.search(taskFilter);
-    }
+  // const fuse = new Fuse(allTasks, fuseOptions);
+  // let results;
+  // useEffect(() => {
+  //   if (taskFilter) {
+  //     results = fuse.search(taskFilter);
+  //   }
 
-  }, [taskFilter, allTasks])
+  // }, [taskFilter, allTasks])
 
 
   console.log("TAKSS", allTasks)
