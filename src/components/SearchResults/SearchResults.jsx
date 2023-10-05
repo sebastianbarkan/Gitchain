@@ -28,10 +28,10 @@ function SearchResults() {
   return (
     <div className={styles.wrapper}>
       {
-        results !== null && results !== undefined ?
-          results.map((result, i) => (
-            <Task key={i} {...result.item} />
-          ))
+          allTasks !== undefined && allTasks !== null ?
+          allTasks.map((e, i) => {
+            return <Task info={e} key={i}/>
+          })
           :
           <p>Waiting for work, take a break and relax</p>
       }
