@@ -32,6 +32,36 @@
         padding 0.3s ease-in-out;
 }
 
+.badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .badge-value-container-outer {
+    background-color: #FF47ED;
+    background-image: linear-gradient(to bottom right, #ff47ed, #9747FF);
+    border-radius: 16px;
+    padding: 2px;
+  }
+  
+  .badge-value-container {
+    background-image: linear-gradient(to bottom right, #55174f, #2e154e);
+    width: 57px;
+    height: 57px;
+    border-radius: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .badge-value {
+    font-size: 19.3px;
+    font-weight: 500;
+    color: #BA85FF;
+  }
+  
+  
 .linkActive {
     background-color: #484C5C;
     border-radius: 35px;

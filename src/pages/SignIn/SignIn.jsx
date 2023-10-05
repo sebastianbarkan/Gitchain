@@ -111,9 +111,9 @@ export default function SignIn() {
                         null
                 }
             </div>
-            <div className={styles.imgWrap}>
+            {/* <div className={styles.imgWrap}>
                 <img src={GraphicsLP} alt="Gitchain graphics" className={styles["img-graphics"]} />
-            </div>
+            </div> */}
         </section>
     )
 }

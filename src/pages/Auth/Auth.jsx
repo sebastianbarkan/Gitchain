@@ -32,19 +32,14 @@ function Auth({ children }) {
             // Ensure tronWeb is available and properly initialized
             if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
                 const currentAddress = window.tronWeb.defaultAddress.base58;
-                console.log("CURRENT", currentAddress)
-                console.log("OLDER", address)
                 // If the address is different from the previously stored one, log the change
                 if (currentAddress !== previousAddress) {
-                    console.log('Address changed:', currentAddress);
-                    dispatch(setAuth({ address: currentAddress}))
+                    dispatch(setAuth({ address: currentAddress }))
                     previousAddress = currentAddress;
                 }
             }
-        }, 10000);
+        }, 3000);
 
-
-      
     }, [tronWeb.fullNode.host])
 
     return (

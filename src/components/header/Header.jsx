@@ -29,31 +29,20 @@ function Header() {
           to="/"
           className={
             location.pathname === "/" ?
-            styles.linkActive
-            :
-            styles.link
+              styles.linkActive
+              :
+              styles.link
           }
         >
           Home
         </Link>
         <Link
-          to="submissions"
+          to="createtask"
           className={
-            location.pathname === "/submissions" ?
-            styles.linkActive
-            :
-            styles.link
-          }
-        >
-          Submissions
-        </Link>
-        <Link 
-           to="createtask"
-           className={
             location.pathname === "/createtask" ?
-            styles.linkActive
-            :
-            styles.link
+              styles.linkActive
+              :
+              styles.link
           }
         >
           Create Task
@@ -61,24 +50,25 @@ function Header() {
         {
           githubAuth ?
             <>
-              <p className={styles.trust}>{trustLevel}</p>
-              <Link
+              <div className={styles.badge}>
+                <div className={styles["badge-value-container-outer"]}>
+                  <div className={styles["badge-value-container"]}>
+                    <p className={styles["badge-value"]}>{trustLevel}</p>
+                  </div>
+                </div>
+              </div>
+              <span
                 to="profile"
-                className={
-                  location.pathname === "/profile" ?
-                  styles["link-profile-active"]
-                  :
-                  styles["link-profile"]
-                }
+                className={styles["link-profile"]}
               >
-                <Avatar 
+                <Avatar
                   name={`${address}`}
                   round={true}
                   size='32'
                   className={styles.avatar}
                 />
                 {formattedAddress()}
-              </Link>
+              </span>
             </>
 
             :

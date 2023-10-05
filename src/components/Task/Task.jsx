@@ -5,18 +5,18 @@ import { fetchTaskStatus, initializeSubmission } from '../../redux/slices/TaskSl
 import { unwrapResult } from '@reduxjs/toolkit'
 import { submitUserTask, completeUserTask, fetchSubmitterAddress } from '../../redux/slices/TaskSlice'
 import tronWeb from '../../tron/tronWeb'
+import { setOpen, setInfo } from '../../redux/slices/DisplaySlice'
+import { fetchConvertedValue } from '../../redux/slices/ConversionSlice';
 
 function Task({ info }) {
-  const [status, setStatus] = useState(null)
+
   const [submitCommit, setSubmitCommit] = useState("")
   const [verdict, setVerdict] = useState("")
   const address = useSelector(state => state.auth.address)
   const trustLevel = useSelector(state => state.user.trustLevel)
   const dispatch = useDispatch()
-  const handleClick = () => {
-    dispatch(initializeSubmission({ taskId: info.taskId, userLevel: trustLevel }))
-  }
 
+  const convertedValue = useSelector(state => state.conversion.convertedValue);
   const handleSubmitTask = (e) => {
     e.preventDefault()
 
@@ -25,93 +25,80 @@ function Task({ info }) {
     }
   }
 
-  const handleVerdict = (e) => {
-    setVerdict(e.target.value)
-  }
 
-  const submitVerdict = (e) => {
-    e.preventDefault()
-    const getSubmitterAddress = async (taskId) => {
-      try {
-        // Dispatch the action to fetch the submitter address
-        const actionResult = await dispatch(fetchSubmitterAddress(taskId));
+  const toggleOpen = () => {
 
-        // Unwrap the result and get the submitter address
-        const submitterAddress = actionResult.payload;
-
-        console.log("Fetched Submitter Address:", submitterAddress, tronWeb.defaultAddress);
-        if (submitterAddress !== tronWeb.defaultAddress.hex) {
-          console.log("LEVEL", trustLevel)
-          dispatch(completeUserTask({ taskId: info.taskId, signerLevel: trustLevel, verdict: verdict }))
-        }
-        // Now you can use submitterAddress in your component's state or wherever you need it
-      } catch (error) {
-        console.error("Failed to fetch submitter address:", error.message);
-      }
-    }
-
-
-    // Call getSubmitterAddress with the taskId
-    getSubmitterAddress({ taskId: info.taskId });
-
+    dispatch(setInfo(info))
+    dispatch(setOpen(true))
   }
 
   useEffect(() => {
-    const getStatus = async () => {
-      console.log("STA", info.taskId);
-
+    const handleConversion = async (trxValue) => {
       try {
-        // The dispatched action will either result in a fulfilled or rejected action
-        const actionResult = await dispatch(fetchTaskStatus({ taskId: info.taskId }));
-
-        // Using unwrapResult will throw an error if the action was rejected
-        const fetchedStatus = unwrapResult(actionResult);
-        setStatus(fetchedStatus)
-        console.log("Fetched Task Status:", fetchedStatus);
-
-      } catch (error) {
-        console.error("Failed to fetch task status:", error.message);
+        await dispatch(fetchConvertedValue(trxValue)).unwrap();
+      } catch (err) {
+        console.error("Conversion failed:", err);
       }
-    }
+    };
 
-    getStatus();
-  }, []);
+    if (info.amount) {
+      let value = info.amount
+      handleConversion(value)
+    }
+  }, [info.amount])
 
   return (
-    <div className={styles.wrapper}>
-      <p style={{ color: "white" }}>{info.description}</p>
-      Task
-      {
-        status === null ?
-          null
-          :
-          status === "NEW" ?
-            <button onClick={handleClick} type='button'>CONNECT TO SUBMISSION</button>
-            :
-            status === "IN PROGRESS" ?
-              <>
-                <form onSubmit={handleSubmitTask}>
-                  <p>IN PROGRESS</p>
-                  <input type="text" value={submitCommit} onChange={(e) => {
-                    setSubmitCommit(e.target.value)
-                  }} />
-                  <button type='submit'>SUbmit</button>
-                </form>
+    <div className={styles.wrapper} onClick={toggleOpen}>
 
-              </>
-              :
-              status === "WAITING FOR SIGNER" ?
-                <>
-                  <form onSubmit={submitVerdict}>
-                    <input type="text" value={verdict} onChange={handleVerdict} />
-                    <button type='submit'>SUBMIT VERDICT</button>
-                  </form>
-                </>
-                : null
+      <div className={styles.card}>
+        <div className={styles["card-header"]}>
+          <div className={styles["base-details"]}>
+            {console.log("INFO", info)}
+            <p className={styles["task-name"]}>{info.amount} TRX</p>
+            <div className={styles.subject}>
+              <p className={styles["subject-text"]}>{info.category}</p>
+            </div>
+            <span className={styles.languageWrap}>
+              {
+                info.languages.map((e, i) => {
+                  return <p className={styles.stack}>{e.label}</p>
+                })
+              }
+            </span>
+          </div>
+          <div className={styles.badges}>
+            <div className={styles.badge}>
+              <div className={styles["badge-value-container-outer"]}>
+                <div className={styles["badge-value-container"]}>
+                  <p className={styles["badge-value"]}>${convertedValue.toFixed(0)}</p>
+                </div>
+              </div>
+              <p className={styles["badge-name"]}>Reward</p>
+            </div>
+            <div className={styles.badge}>
+              <div className={styles["badge-value-container-outer"]}>
+                <div className={styles["badge-value-container"]}>
+                  <p className={styles["badge-value"]}>1</p>
+                </div>
+              </div>
+              <p className={styles["badge-name"]}>Level</p>
+            </div>
+          </div>
+        </div>
+        <div className={styles["card-body"]}>
+          <p className={styles["card-description"]}>
+            {info.description}
+          </p>
+        </div>
+        <div className={styles["card-footer"]}>
 
-      }
+          <div className={styles["card-author"]}>
+            <p className={styles.author}>{info.taskId}</p>
+          </div>
 
-    </div >
+        </div>
+      </div>
+    </div>
   )
 }
 

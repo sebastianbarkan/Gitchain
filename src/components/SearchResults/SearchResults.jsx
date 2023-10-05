@@ -1,41 +1,36 @@
-import React, { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux';
-import styles from "./SearchResults.module.css"
-import Task from "../Task/Task"
-import Fuse from 'fuse.js'
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styles from "./SearchResults.module.css";
+import Task from "../Task/Task";
 
 function SearchResults() {
-  const dispatch = useDispatch();
   const allTasks = useSelector(state => state.task.allTasks);
   const taskFilter = useSelector(state => state.task.taskFilter);
 
-  const fuseOptions = {
-    keys: ['description', "category"],
-    threshold: 0.3,
-  };
+  const [searchResults, setSearchResults] = useState([]);
 
-  // const fuse = new Fuse(allTasks, fuseOptions);
-  // let results;
-  // useEffect(() => {
-  //   if (taskFilter) {
-  //     results = fuse.search(taskFilter);
-  //   }
-
-  // }, [taskFilter, allTasks])
-
+  useEffect(() => {
+    if (taskFilter) {
+      const filteredTasks = allTasks.filter(task => 
+        task.description.toLowerCase().includes(taskFilter.toLowerCase()) || 
+        (task.category && task.category.toLowerCase().includes(taskFilter.toLowerCase()))
+      );
+      setSearchResults(filteredTasks);
+    } else {
+      setSearchResults(allTasks); // if there's no filter, show all tasks
+    }
+  }, [taskFilter, allTasks]);
 
   return (
     <div className={styles.wrapper}>
       {
-          allTasks !== undefined && allTasks !== null ?
-          allTasks.map((e, i) => {
-            return <Task info={e} key={i}/>
-          })
+        searchResults && searchResults.length > 0 ?
+          searchResults.map((e, i) => <Task info={e} key={i} />)
           :
           <p>Waiting for work, take a break and relax</p>
       }
     </div>
-  )
+  );
 }
 
-export default SearchResults
+export default SearchResults;

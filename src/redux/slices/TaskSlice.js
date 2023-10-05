@@ -2,6 +2,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from 'uuid';
 import tronWeb from "../../tron/tronWeb";
 import axios from "axios"
+import { startTransactionPolling } from "./PollingSlice";
+import { toast } from 'react-toastify';
+import { setUserTrustData } from "./UserSlice";
+
 
 const initialState = {
 	trustLevel: null,
@@ -163,7 +167,9 @@ export const createTask = createAsyncThunk(
 			const transactionInfo = await contract.createTask(taskId, taskLevel, signerLevel).send({
 				callValue: bountyAmount,
 			});
-
+			console.log("TRANS", transactionInfo)
+			dispatch(startTransactionPolling({transactionInfo, tronWeb}));
+			toast.info('Transaction initiated. Awaiting confirmation...');
 			if (!transactionInfo) {
 				throw new Error('No response from contract.');
 			}
@@ -219,7 +225,8 @@ export const initializeSubmission = createAsyncThunk(
 			const contract = tronWeb.contract(ABI, import.meta.env.VITE_APP_CONTRACT_ADDRESS_TASK);
 
 			const transactionInfo = await contract.initializeSubmission(taskId, userLevel).send();
-			console.log("TRX INFO", transactionInfo)
+			dispatch(startTransactionPolling({transactionInfo, tronWeb}));
+			toast.info('Transaction initiated. Awaiting confirmation...');
 			if (!transactionInfo) {
 				throw new Error('No response from contract.');
 			}
@@ -270,7 +277,8 @@ export const submitUserTask = createAsyncThunk(
 
             // Call the submitTask function in the contract
             const transactionInfo = await contract.submitTask(taskId, githubCommit).send();
-            console.log("TRX INFO", transactionInfo);
+            dispatch(startTransactionPolling({transactionInfo, tronWeb}));
+			toast.info('Transaction initiated. Awaiting confirmation...');
 
             if (!transactionInfo) {
                 throw new Error('No response from contract.');
@@ -333,17 +341,44 @@ export const fetchSubmitterAddress = createAsyncThunk(
     }
 );
 
+
+export const fetchGithubCommit = createAsyncThunk(
+    'task/fetchGithubCommit',
+    async (taskId, { rejectWithValue }) => {
+        try {
+            const contract = tronWeb.contract(ABI, import.meta.env.VITE_APP_CONTRACT_ADDRESS_TASK);
+
+            // Fetch task data by taskId
+            const taskData = await contract.tasks(taskId.taskId).call();
+            // Extract and return the githubCommit from the task data
+            return taskData.githubCommit;
+
+        } catch (error) {
+            console.error("Error fetching githubCommit:", error);
+            return rejectWithValue(error.toString());
+        }
+    }
+);
+
 export const completeUserTask = createAsyncThunk(
     'task/completeUserTask',
     async ({ taskId, signerLevel, verdict }, { getState, dispatch }) => {
-        console.log("Completing task ID:", taskId, "with signerLevel:", signerLevel, "and verdict:", verdict);
-
+       
         try {
             const contract = tronWeb.contract(ABI, import.meta.env.VITE_APP_CONTRACT_ADDRESS_TASK);
 
             // Call the completeTask function in the contract
             const transactionInfo = await contract.completeTask(taskId, signerLevel, verdict).send();
-            console.log("TRX INFO", transactionInfo);
+			
+			dispatch(startTransactionPolling({transactionInfo, tronWeb}));
+			toast.info('Transaction initiated. Awaiting confirmation...');
+
+			const address = getState().auth.address
+
+			if (transactionInfo) {
+				dispatch(setContributions())
+				dispatch(setUserTrustData({initial:false, address: address }))
+			}
 
             if (!transactionInfo) {
                 throw new Error('No response from contract.');

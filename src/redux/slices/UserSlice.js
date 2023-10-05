@@ -249,7 +249,7 @@ const userContractABI = [
 
 export const setUserTrustData = createAsyncThunk(
 	'user/setUserTrustData',
-	async ({ initial, data, address }, { getState, dispatch }) => {
+	async ({ initial, address }, { getState, dispatch }) => {
 
 		const contributions = getState().user.contributions
 		const status = getState().user.status
@@ -302,7 +302,6 @@ export const setUserTrustData = createAsyncThunk(
 				
 				const newTrustLevel = calculateTrustLevel({trustLevel, verifications: signedData.length, contributionCount: contributionsData.length })
 
-				console.log("NEW TRUST", newTrustLevel)
 				transactionHash = await contract.setUserTrustData(
 					userAddress,
 					newTrustLevel,
@@ -390,7 +389,11 @@ export const establishUser = createAsyncThunk("user/establishUser", async (args,
 const userSlice = createSlice({
 	name: 'user',
 	initialState,
-	reducers: {},
+	reducers: {
+		setContributions(state, {payload}){
+			state.contributions.push({taskLevel: 1, commitHash: "testHash"})
+		}
+	},
 	extraReducers: (builder) => {
 		builder
 			.addCase(setUserTrustData.pending, (state) => {
