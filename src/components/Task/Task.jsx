@@ -11,9 +11,7 @@ import { fetchConvertedValue } from '../../redux/slices/ConversionSlice';
 function Task({ info }) {
 
   const [submitCommit, setSubmitCommit] = useState("")
-  const [verdict, setVerdict] = useState("")
-  const address = useSelector(state => state.auth.address)
-  const trustLevel = useSelector(state => state.user.trustLevel)
+
   const dispatch = useDispatch()
 
   const convertedValue = useSelector(state => state.conversion.convertedValue);

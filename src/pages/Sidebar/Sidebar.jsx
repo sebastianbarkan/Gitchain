@@ -79,23 +79,6 @@ function Sidebar() {
 
     const [githubCommit, setGithubCommit] = useState("");  // local state to store the fetched githubCommit
 
-    useEffect(() => {
-        const getGithubCommit = async () => {
-            try {
-                // The dispatched action will either result in a fulfilled or rejected action
-                const actionResult = await dispatch(fetchGithubCommit({ taskId: info.taskId }));
-
-                // Using unwrapResult will throw an error if the action was rejected
-                const fetchedGithubCommit = unwrapResult(actionResult);
-                setGithubCommit(fetchedGithubCommit);
-
-            } catch (error) {
-                console.error("Failed to fetch github commit:", error.message);
-            }
-        }
-
-        getGithubCommit();
-    }, []);
 
     const convertedValue = useSelector(state => state.conversion.convertedValue);
 
@@ -187,11 +170,7 @@ function Sidebar() {
                                 :
                                 status === "WAITING FOR SIGNER" ?
                                     <div>
-                                        <p>{
-                                            githubCommit ?
-                                            githubCommit:
-                                            null
-                                        }</p>
+                                        
                                         <form onSubmit={submitVerdict} className={styles.form}>
                                             <select className={styles.dropdown} value={verdict} onChange={handleVerdict}>
                                                 <option value="accepted">Accepted</option>
